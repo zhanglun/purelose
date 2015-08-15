@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block head %} {{ super() }}
+<link rel="stylesheet" href="/static/build/css/index.css" /> {% endblock %} {% block content %}
+
+<div class="mask"></div>
+<div class="app-list" id="apps">
+    <a href="/music/">HTML5音乐可视化(building...)</a>
+    <a href="/daily/">纸糊日报(building...)</a>
+</div>
+<script>
+    window.onload = function() {
+        var img = new Image();
+        img.onload = function() {
+            document.getElementsByTagName("body")[0].style.backgroundImage = "url(../static/images/bg3.jpg)";
+            document.getElementById("apps").className += " trigger";
+        };
+        img.src = "../static/images/bg3.jpg";
+    }
+</script>
+{% endblock %} {% block footer %}
+<footer>
+    <p>这是一个我正在做的demo合集站点，希望借此提高自己的技艺，每天都会完善，将学习变成习惯</p>
+
+    <p>CopyRight@zhanglun</p>
+</footer>
+{% endblock %}

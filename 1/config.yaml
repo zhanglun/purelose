@@ -1,0 +1,8 @@
+name: pureloser
+version: 1
+
+cron:
+- description: save images for zhihui.com
+  url: /daily/api/save_image
+  timezone: Beijing
+  schedule: "*/30 * * * *"

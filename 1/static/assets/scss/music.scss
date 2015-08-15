@@ -1,0 +1,69 @@
+#songList {
+  li.selected {
+    background: #3d3d3d;
+    color: #ff00ee;
+  }
+}
+
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#layer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  background: #F08080;
+}
+
+$loadingW: 250px;
+$loadingH: 80px;
+.loading {
+  width: $loadingW;
+  height: $loadingH;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -$loadingW/2;
+  margin-top: -($loadingH+20)/2;
+  font-size: 70px;
+  overflow: hidden;
+  -webkit-animation: loading 5s linear infinite 1s;
+  -moz-animation: loading 5s linear infinite 0s;
+  animation: loading 5s linear infinite 0s;
+}
+
+@-webkit-keyframes loading {
+  0% {
+    width: $loadingW;
+  }
+  10% {
+    width: $loadingW + 20;
+  }
+  20% {
+    width: $loadingW + 40;
+  }
+  30% {
+    width: $loadingW + 60;
+  }
+  40% {
+    width: $loadingW + 80;
+  }
+  50% {
+    width: $loadingW + 100;
+  }
+
+}

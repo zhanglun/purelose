@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>纸糊日报</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+    <link rel="stylesheet" href="../static/build/css/global/base.css" media="all">
+    <link rel="stylesheet" href="../static/build/css/daily.css" media="all">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul class="daily-nav">
+                <li><a href="#news_lastest">最新消息</a>
+                </li>
+                <li><a href="#news_hot">热门消息</a>
+                </li>
+                <li><a href="#news_history">历史消息</a>
+                </li>
+                <li><a href="#news_channel">栏目预览</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container daily">
+        <div class="main">
+            <!--             <div class="top-stories-container"jjj>
+                        <ul id="top_stories">
+                        </ul>
+                    </div> -->
+            <h2>今天是：</h2>
+            <ul id="stories_list">
+            </ul>
+        </div>
+        <p id="target">!</p>
+    </div>
+    <script id="tmpl-stories" type="text/template">
+        <p>更新时间：
+            <%= date %>
+        </p>
+        <% _.each(stories, function(item){ %>
+            <li>
+                <div class="daily-item">
+                    <img src="<%= item.images[0] %>" alt="<%= item.title %>">
+                    <a href="http://daily.zhihu.com/story/<%= item.id  %>">
+                        <%= item.title %>
+                    </a>
+                </div>
+            </li>
+            <% }); %>
+    </script>
+    <script id="tmpl-hot" type="text/template">
+        <% _.each(recent, function(item){ %>
+            <li>
+                <div class="daily-item">
+                    <img src="<%= item.thumbnail %>" alt="<%= item.title %>">
+                    <a href="http://daily.zhihu.com/story/<%= item.news_id  %>">
+                        <%= item.title %>
+                    </a>
+                </div>
+            </li>
+            <% }); %>
+    </script>
+    <!--<div id="spa">-->
+    <!--<div class="spa-slider"></div>-->
+    <!--</div>-->
+    <script src="../static/build/vendor/jquery/dist/jquery.js"></script>
+    <script src="../static/build/vendor/underscore/underscore.js"></script>
+    <script src="../static/build/vendor/backbone/backbone.js"></script>
+    <script src="../static/src/daily.js"></script>
+    <!--<script src="../static/src/spa.js"></script>-->
+</body>
+
+</html>

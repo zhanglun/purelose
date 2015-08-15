@@ -1,0 +1,4 @@
+Jinja2==2.7.3
+MarkupSafe==0.23
+pymongo==2.8
+web.py==0.36
