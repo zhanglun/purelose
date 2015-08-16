@@ -23,7 +23,7 @@ urls = (
     '/user', 'User',
     '/daily', zhihudaily.app,
     '/music', music.app,
-    '/testgitcafe', 'Gitcafe'
+    '/test', 'Gitcafe'
 )
 
 app_root = os.path.dirname(__file__)
