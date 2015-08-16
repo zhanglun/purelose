@@ -22,7 +22,8 @@ urls = (
     '/movie', 'Movie',
     '/user', 'User',
     '/daily', zhihudaily.app,
-    '/music', music.app
+    '/music', music.app,
+    '/testgitcafe', 'Gitcafe'
 )
 
 app_root = os.path.dirname(__file__)
@@ -68,7 +69,12 @@ class User:
     def POST(self):
         return 'Hey, man!'
 
+class Gitcafe:
+    def __init__(self):
+        pass
 
+    def GET(self):
+        return 'Hello, test for gitcafe!'
 
 
 app = web.application(urls, globals())
