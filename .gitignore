@@ -1,1 +1,5 @@
 **/.idea/**
+bower_component/
+*.pyc
+node_modules/
+venv/
