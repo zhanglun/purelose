@@ -92,7 +92,7 @@ class TodoApp:
     def GET(self):
         return render.todo()
 
-    def POST():
+    def POST(self):
         return 'post'
 
 

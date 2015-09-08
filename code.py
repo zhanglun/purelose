@@ -11,8 +11,7 @@ import json
 import web
 from web.contrib.template import render_jinja
 
-from views import zhihudaily
-from views import music
+from views import zhihudaily, music, todo
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6)Gecko/20091201 Firefox/3.5.6'}
 
@@ -23,7 +22,7 @@ urls = (
     '/user', 'User',
     '/daily', zhihudaily.app,
     '/music', music.app,
-    '/test', 'Gitcafe'
+    '/todo', todo.app
 )
 
 app_root = os.path.dirname(__file__)
@@ -47,7 +46,7 @@ class Index:
 
     def GET(self):
         title = 'Web实践 | 张小伦爱学习|'
-        return render.index()
+        return render.index(title)
 
 
 class Movie:
@@ -68,13 +67,6 @@ class User:
 
     def POST(self):
         return 'Hey, man!'
-
-class Gitcafe:
-    def __init__(self):
-        pass
-
-    def GET(self):
-        return 'Hello, test for gitcafe!'
 
 
 app = web.application(urls, globals())
