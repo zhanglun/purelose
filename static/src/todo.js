@@ -1,10 +1,11 @@
-$(function() {
+$(function () {
     var Todo = Backbone.Model.extend({
         urlRoot: '/todo/item',
 
-        initialize: function() {},
+        initialize: function () {
+        },
 
-        defaults: function() {
+        defaults: function () {
             return {
                 title: 'empty todo...',
                 done: false
@@ -12,7 +13,7 @@ $(function() {
         },
 
         // 设置任务完成状态
-        toggle: function() {
+        toggle: function () {
             this.save({
                 done: !this.get('done')
             });
@@ -27,19 +28,19 @@ $(function() {
         url: '/todo/list',
         model: Todo,
 
-        done: function() {
+        done: function () {
             return this.where({
                 done: true
             });
         },
 
-        remaining: function() {
+        remaining: function () {
             return this.where({
                 done: false
             });
         },
 
-        nextOrder: function() {
+        nextOrder: function () {
             if (!this.lengtth) {
                 return 1;
             }
@@ -66,29 +67,29 @@ $(function() {
             'blur .edit': 'close'
         },
 
-        initialize: function() {
+        initialize: function () {
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destory', this.remove);
         },
 
-        render: function() {
+        render: function () {
             this.$el.html(this.template(this.model.toJSON()));
             this.$el.toggleClass('done', this.model.get('done'));
             this.input = this.$('.edit');
             return this.$el
         },
 
-        toggleDone: function() {
+        toggleDone: function () {
             this.model.toggle();
         },
 
-        edit: function() {
+        edit: function () {
             $(this.el).addClass('editing');
             this.input.focus();
         },
 
         // close
-        close: function() {
+        close: function () {
             var value = this.input.val();
             if (!value) {
                 this.clear();
@@ -100,13 +101,13 @@ $(function() {
             }
         },
 
-        updateOnEnter: function(e) {
+        updateOnEnter: function (e) {
             if (e.keyCode == 13) {
                 this.close();
             }
         },
 
-        clear: function() {
+        clear: function () {
             this.model.destroy();
         }
 
@@ -125,10 +126,10 @@ $(function() {
 
         // 在初始化过程中，绑定时间到Todos上
 
-        initialize: function() {
+        initialize: function () {
             // this.statusTemplate = _.template($('#status-template').html(), {});
-            this.input = this.$('#new-todo');
-            this.allCheckbox = this.$('#toggle-all');
+            this.$input = this.$('#new-todo');
+            this.$allCheckbox = this.$('#toggle-all');
 
             this.listenTo(Todos, 'add', this.addOne);
             this.listenTo(Todos, 'reset', this.addAll);
@@ -141,7 +142,7 @@ $(function() {
 
         },
 
-        render: function() {
+        render: function () {
             var done = Todos.done().length;
             var remaining = Todos.remaining.length;
             if (Todos.length) {
@@ -156,62 +157,58 @@ $(function() {
                 this.footer.hide();
             }
 
-            this.allCheckbox.checked = !remaining;
+            this.$allCheckbox.checked = !remaining;
         },
 
-        addOne: function(todo) {
+        addOne: function (todo) {
             var view = new TodoView({
                 model: todo
             });
             this.$('#todo-list').append(view.render());
         },
 
-        addAll: function() {
+        addAll: function () {
             Todos.each(this.addOne, this);
         },
 
-        newAttributes: function() {
+        newAttributes: function () {
             return {
-                title: this.input.val(),
-                order: Todos.nextorder(),
+                title: this.$input.val(),
+                order: Todos.nextOrder(),
                 donw: false
             }
         },
 
-        createOnEnter: function(e) {;
+        createOnEnter: function (e) {
             if (e.keyCode == 13) {
-                if (!this.input.val()) {
+                if (!this.$input.val()) {
                     return false;
                 }
 
                 // Todos.create({
-                //     title: this.input.val(),
+                //     title: this.$input.val(),
                 //     order: Todos,
                 //     done: false,
                 // });
-                var new_item = new Todo({
-                    title: this.input.val(),
-                    order: Todos,
-                    done: false,
-                });
+                var new_item = new Todo(this.newAttributes());
                 new_item.save();
-                this.input.val('');
-                this.addOne();
+                this.$input.val('');
+                this.addOne(new_item);
             }
         },
 
-        renderNewTodo: function() {
+        renderNewTodo: function () {
 
         },
 
-        clearCompleted: function() {
+        clearCompleted: function () {
             _.invoke(Todos.done(), 'destroy');
             return false
         },
 
-        toggleAllComplete: function() {
-            var done = this.allCheckbox.checked;
-            Todos.each(function(todo) {
+        toggleAllComplete: function () {
+            var done = this.$allCheckbox.checked;
+            Todos.each(function (todo) {
                 todo.save({
                     'done': done
                 });

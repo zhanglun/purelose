@@ -40,12 +40,7 @@ class TodoList:
         list_len = db['Todo'].find().count()
         data = web.data()
         data = json.loads(data)
-        print '---------------'
-        print type(data)
         data['order'] = list_len + 1
-        # data['_id'] = str(data['_id'])
-        print db['Todo'].insert(data)
-        print data
         return data
 
 
