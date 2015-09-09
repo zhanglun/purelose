@@ -20,10 +20,6 @@ $(function () {
         }
     });
 
-    // var test = new Todo({title:'删除按钮的bug还未解决'});
-    // console.log(test.get('title'));
-    // test.save();
-
     var TodoList = Backbone.Collection.extend({
         url: '/todo/list',
         model: Todo,
@@ -64,7 +60,8 @@ $(function () {
             'click .view>label': 'edit',
             'dbclick .destory': 'clear',
             'keypress': 'updateOnEnter',
-            'blur .edit': 'close'
+            'blur .edit': 'close',
+            'click .destroy': 'clear'
         },
 
         initialize: function () {
@@ -109,6 +106,7 @@ $(function () {
 
         clear: function () {
             this.model.destroy();
+            this.$el.hide();
         }
 
     });
