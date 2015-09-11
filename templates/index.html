@@ -1,11 +1,16 @@
-{% extends "base.html" %} {% block head %} {{ super() }}
-<link rel="stylesheet" href="/static/build/css/index.css" /> {% endblock %} {% block content %}
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/build/css/index.css" />
+{% endblock %}
 
-<div class="mask"></div>
-<div class="app-list" id="apps">
-    <a href="/music/">HTML5音乐可视化(building...)</a>
-    <a href="/daily/">纸糊日报(building...)</a>
-</div>
+{% block content %}
+
+    <div class="mask"></div>
+    <div class="app-list" id="apps">
+        <a href="/music/">HTML5音乐可视化(building...)</a>
+        <a href="/daily/">纸糊日报(building...)</a>
+    </div>
 <script>
     window.onload = function() {
         var img = new Image();
