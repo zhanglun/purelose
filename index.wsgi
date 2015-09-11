@@ -2,16 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import urllib2
-import urllib
-import re
-import time
-import json
-
 import web
 from web.contrib.template import render_jinja
 
-from views import zhihudaily, music
+from views import zhihudaily, music, tools
 # from views import todo
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6)Gecko/20091201 Firefox/3.5.6'}
@@ -19,11 +13,10 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9
 urls = (
     '/(.*)/', 'Redirect',
     '/', 'Index',
-    '/movie', 'Movie',
-    '/user', 'User',
     '/daily', zhihudaily.app,
     '/music', music.app,
-   # '/todo', todo.app
+    # '/todo', todo.app,
+    '/tools', tools.app
 )
 
 app_root = os.path.dirname(__file__)
@@ -46,28 +39,10 @@ class Index:
         pass
 
     def GET(self):
-        title = 'Web实践 | 张小伦爱学习|'
-        return render.index(title)
-
-
-class Movie:
-    def __init__(self):
-        pass
-
-    def GET(self):
-
-        return render.movie()
-
-
-class User:
-    def __init__(self):
-        pass
-
-    def GET(self):
-        return 'Hello, user!'
-
-    def POST(self):
-        return 'Hey, man!'
+        title = u'Web实践 | 张小伦爱学习|'
+        result = {}
+        result['title'] = title
+        return render.index(result)
 
 
 app = web.application(urls, globals())
@@ -78,5 +53,3 @@ elif 'SERVER_SOFTWARE' in os.environ:
     import sae
     application = sae.create_wsgi_app(app.wsgifunc())
 
-
-# this is the head link
