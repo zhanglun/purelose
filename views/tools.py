@@ -117,4 +117,4 @@ class AladdImages:
         for url in imgs:
             saveAladdImages(url, '')
 
-        return 'Aladd 每日大图'
+        return u'Aladd 每日大图'
