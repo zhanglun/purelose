@@ -72,10 +72,8 @@ def getAladdImageUrlList():
 def saveAladdImages(url, path):
     # 去掉 ‘http://’
     file_path = url[6:]
-    # dir_path = re.match(r'/\w+\w+(\.\w+)\/', file_path).group(0)
 
     # 获取文件名
-    # print('------->' + dir_path)
     file_name = re.search(r'[0-9a-zA-Z]*\.(jpg|png|jpeg)', file_path).group()
     print file_name
     # YYYY-MM-DD
