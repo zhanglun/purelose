@@ -88,7 +88,7 @@ def saveAladdImages(url, path):
         # 存取一个文件到bucket中
         fr = urllib.urlopen(url)
         stream = fr.read()
-        bucket.put_object('/Aladd/' + ctime + '/' + file_name, stream)
+        bucket.put_object('Aladd/' + ctime + '/' + file_name, stream)
         return bucket
 
     else:
