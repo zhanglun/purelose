@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import web
 from web.contrib.template import render_jinja
+
+if 'SERVER_SOFTWARE' in os.environ:
+    app_root = os.path.dirname(__file__)
+    sys.path.insert(0, os.path.join(app_root, 'beautifulsoup4-4.4.1'))
 
 from views import zhihudaily, music, tools
 # from views import todo
@@ -24,7 +29,6 @@ templates_root = os.path.join(app_root, 'templates')
 render = render_jinja('templates', encoding='utf-8')
 
 
-
 # Routers
 
 class Redirect:
@@ -33,6 +37,7 @@ class Redirect:
 
     def GET(self, path):
         web.seeother('/' + path)
+
 
 class Index:
     def __init__(self):
@@ -51,5 +56,6 @@ if __name__ == "__main__":
     app.run()
 elif 'SERVER_SOFTWARE' in os.environ:
     import sae
+
     application = sae.create_wsgi_app(app.wsgifunc())
 
