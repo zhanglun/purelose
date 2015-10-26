@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __init__ import *
-from bs4 import BeautifulSoup
-
+# from bs4 import BeautifulSoup
+from pyquery import PyQuery as pq
+from lxml import etree
 app_path = os.getcwd()
 
 media_path = os.path.join(app_path, 'static', 'media')
