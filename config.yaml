@@ -5,7 +5,7 @@ cron:
 - description: save images for zhihui.com
   url: /daily/api/save_image
   timezone: Beijing
-  schedule: "*/30 * * * *"
+  schedule: "* */8 * * *"
 
 - description: save datu from http://aladd.net/datu everyday
   url: /tools/aladd/images_everyday
