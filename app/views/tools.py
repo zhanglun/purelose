@@ -22,8 +22,7 @@ def readfiles(dir):
 
 urls = (
     '', 'Tools',
-    '/aladd/images_everyday', 'AladdImages',
-    '/api/blog/postlist', 'BlogPostList'
+    '/aladd/images_everyday', 'AladdImages'
 )
 
 app = web.application(urls, locals())
@@ -99,16 +98,6 @@ def saveAladdImages(url, path):
 
 
 
-class BlogPostList:
-    def __init__(self):
-        pass
-
-    def GET(self):
-        if 'SERVER_SOFIWARE' in os.environ:
-            from sae.storage import Bucket
-            bucket = Bucket('album')
-            filelist = bucket.list()
-            return [i for i in filelist]
 
 
 
