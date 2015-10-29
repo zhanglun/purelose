@@ -7,7 +7,7 @@ cron:
   timezone: Beijing
   schedule: "* */8 * * *"
 
-- description: save datu from http://aladd.net/datu everyday
-  url: /tools/aladd/images_everyday
-  timezone: Beijing
-  schedule: "* 13 * * *"
+#- description: save datu from http://aladd.net/datu everyday
+#  url: /tools/aladd/images_everyday
+#  timezone: Beijing
+#  schedule: "* 13 * * *"
