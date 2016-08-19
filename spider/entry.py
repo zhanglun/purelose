@@ -4,22 +4,34 @@ import json
 import urllib.request
 import upload
 
-root = 'http://api.douban.com//v2/movie/top250'
+from db import DBUtil
+
+data_store = DBUtil({'dbname': 'sitedev'})
+movie_collection = data_store.collection.movies
+root = 'http://api.douban.com//v2/movie/top250?start=40'
 
 
-def fetchJSON ():
-  response = urllib.request.urlopen(root)
-  data = response.read()  # type: bytes
-  string = str(data, encoding='utf-8') # type: string
-  data_dict = json.loads(string) # dict
-  # TODO: 遍历 dict 取出 Object 存入 数据库
-  subjects = data_dict['subjects']
-  print(subjects)
+def fetch_json():
+    response = urllib.request.urlopen(root)
+    data = response.read()  # type: bytes
+    string = str(data, encoding='utf-8')  # type: string
+    data_dict = json.loads(string)  # dict
+    # TODO: 遍历 dict 取出 Object 存入 数据库
+    subjects = data_dict['subjects']
+    save_json(subjects)
+
+
+def save_json(data):
+    for movie in data:
+        movie_collection.update_one({'title': movie['title']}, {'$set': movie}, True)
+
+    print('saved.....')
+    return data
 
 
 def start():
-  fetchJSON()
-  return 2
+    fetch_json()
+    return 2
 
 
 start()
