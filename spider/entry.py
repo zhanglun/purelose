@@ -23,6 +23,7 @@ def fetch_json():
 
 def save_json(data):
     for movie in data:
+        # 保存图片到七牛云 尝试
         movie_collection.update_one({'title': movie['title']}, {'$set': movie}, True)
 
     print('saved.....')
@@ -33,5 +34,4 @@ def start():
     fetch_json()
     return 2
 
-
-start()
+# start()

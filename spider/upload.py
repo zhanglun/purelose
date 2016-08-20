@@ -23,6 +23,6 @@ def putImageData(filename, filedata):
     return ret
 
 
-# 作为一个模块文件是必须的
-def modelName():
-    return __name__
+# # 作为一个模块文件是必须的
+# def modelName():
+#     return __name__
