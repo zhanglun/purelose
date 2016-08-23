@@ -1,20 +1,22 @@
-from flask import Flask
+from flask import Flask, render_template
+from flask_script import Manager
 
 app = Flask(__name__)
+app.debug = True
 
 
 @app.route('/')
 def index():
-    return 'Index Page'
+    return render_template('index.html')
 
 
-@app.route('/hello')
-def hello():
-    return 'Hello World!'
+@app.route('/user/<name>')
+def user(name):
+    return render_template('user.html', name=name)
 
 
-app.debug = True
+manager = Manager(app)
 
 # 确保服务器只会在该脚本被 Python 解释器直接执行的时候才会运行，而不是作为模块导入的时候
 if __name__ == '__main__':
-    app.run()
+    manager.run()
