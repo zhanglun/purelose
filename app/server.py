@@ -1,13 +1,17 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_script import Manager
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="./templates")
+
 app.debug = True
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user_agent = request.headers.get('User-Agent')
+    data = {}
+    data['user_agent'] = user_agent
+    return render_template('index.html', data=data)
 
 
 @app.route('/user/<name>')
