@@ -1,8 +1,10 @@
 from flask import render_template, request
-from . import main
+from flask import Blueprint
+
+home = Blueprint('home', __name__, url_prefix='/home')
 
 
-@main.route('/', methods=['GET'])
+@home.route('/', methods=['GET'])
 def index():
     user_agent = request.headers.get('User-Agent')
     data = dict()
