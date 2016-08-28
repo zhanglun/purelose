@@ -22,7 +22,9 @@ class DevelopmentConfig(Config):
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///db/teamcoop.db'
+    MONGO_HOST = 'localhost'
+    MONGO_POST = 27017
+    MONGO_DBNAME = 'sitedev'
 
 
 class TestingConfig(Config):
