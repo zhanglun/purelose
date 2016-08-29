@@ -1,19 +1,25 @@
-from flask import jsonify
+from flask import request, current_app, Response
 from flask import Blueprint
 from app.models import mongo
-from bson import json_util
 import json
+from bson.objectid import ObjectId
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@api.route('/', methods=['GET'])
+class Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        else:
+            return obj
+
+
+@api.route('/movies', methods=['GET'])
 def index():
     movies = mongo.db.movies.find({})
-    result = [];
+    data = list()
     for movie in movies:
-        result.append(movie)
+        data.append(movie)
 
-    print(type(json.loads(json_util.dumps(result))))
-    print(type(json_util.dumps(result)))
-    return jsonify(json.loads(json_util.dumps(result)))
+    return Response(json.dumps(data, cls=Encoder), mimetype='application/json')
