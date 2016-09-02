@@ -1,5 +1,5 @@
 #! usr/bin/env python3
-from flask import Flask
+from flask import Flask, make_response, jsonify
 from app.models import mongo
 from config import config
 
@@ -16,5 +16,13 @@ def create_app(config_name):
     from app.views.api import api as api_blueprint
     app.register_blueprint(home_blueprint)
     app.register_blueprint(api_blueprint)
+
+    @app.errorhandler(404)
+    def http_error_handler(error):
+        return make_response(jsonify({'error': 'Not found'}), 404)
+
+    @app.errorhandler(500)
+    def http_error_handler(error):
+        return make_response(jsonify({'error': 'Server Error'}), 500)
 
     return app

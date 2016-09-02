@@ -1,10 +1,10 @@
-from flask import request, current_app, Response
-from flask import Blueprint
-from app.models import mongo
 import json
+from flask import request, current_app, Response, Blueprint
 from bson.objectid import ObjectId
+from app.models import mongo
+from app.helper import tool
 
-api = Blueprint('api', __name__, url_prefix='/api')
+api = Blueprint('api', __name__, url_prefix='/api/v1.0')
 
 
 class Encoder(json.JSONEncoder):
@@ -17,9 +17,27 @@ class Encoder(json.JSONEncoder):
 
 @api.route('/movies', methods=['GET'])
 def index():
-    movies = mongo.db.movies.find({})
+    movies = mongo.db.movies.find({}, {'title': 1, 'images': 1})
     data = list()
     for movie in movies:
+        movie['id'] = movie['_id']
+        movie.pop('_id', None)
+        data.append(movie)
+
+    return Response(json.dumps(data, cls=Encoder), mimetype='application/json')
+
+
+@api.route('/search/movies', methods=['GET'])
+def search():
+    query_args = request.args.to_dict(False)
+    if not query_args:
+        return Response(json.dumps({}, cls=Encoder), mimetype='application/json')
+    querys = tool.format_query_args(query_args)
+    movies = mongo.db.movies.find(querys.search, {'title': 1, 'images': 1})
+    data = list()
+    for movie in movies:
+        movie['id'] = movie['_id']
+        movie.pop('_id', None)
         data.append(movie)
 
     return Response(json.dumps(data, cls=Encoder), mimetype='application/json')
