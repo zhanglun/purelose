@@ -31,9 +31,17 @@ def index():
 def search():
     query_args = request.args.to_dict(False)
     if not query_args:
-        return Response(json.dumps({}, cls=Encoder), mimetype='application/json')
+        return Response(json.dumps({"message": "Validation Failed",
+                                    "errors": [
+                                        {
+                                            "resource": "Search",
+                                            "field": "q",
+                                            "code": "missing"
+                                        }
+                                    ]}, cls=Encoder), mimetype='application/json')
     querys = tool.format_query_args(query_args)
-    movies = mongo.db.movies.find(querys.search, {'title': 1, 'images': 1})
+    print(querys)
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1})
     data = list()
     for movie in movies:
         movie['id'] = movie['_id']
