@@ -17,9 +17,14 @@ class Encoder(json.JSONEncoder):
 
 @api.route('/movies', methods=['GET'])
 def index():
-    movies = mongo.db.movies.find({}, {'title': 1, 'images': 1})
+    query_args = request.args.to_dict(False)
+    querys = tool.format_query_args(query_args)
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1})
+    if 'order' in querys:
+        movies.sort(querys['sort'], querys['order'])
     data = list()
     for movie in movies:
+        movie['douban_id'] = movie['id']
         movie['id'] = movie['_id']
         movie.pop('_id', None)
         data.append(movie)
@@ -40,10 +45,10 @@ def search():
                                         }
                                     ]}, cls=Encoder), mimetype='application/json')
     querys = tool.format_query_args(query_args)
-    print(querys)
-    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1})
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1})
     data = list()
     for movie in movies:
+        movie['douban_id'] = movie['id']
         movie['id'] = movie['_id']
         movie.pop('_id', None)
         data.append(movie)
