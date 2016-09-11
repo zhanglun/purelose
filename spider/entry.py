@@ -8,7 +8,7 @@ from db import DBUtil
 
 data_store = DBUtil({'dbname': 'sitedev'})
 movie_collection = data_store.collection.movies
-root = 'http://api.douban.com/v2/movie/top250?start=160'
+root = 'http://api.douban.com/v2/movie/top250?start=220'
 
 
 def fetch_json():
