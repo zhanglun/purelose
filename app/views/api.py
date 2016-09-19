@@ -19,10 +19,10 @@ class Encoder(json.JSONEncoder):
 def index():
     query_args = request.args.to_dict(False)
     querys = tool.format_query_args(query_args)
-    # movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1})
-    movies = mongo.db.movies.find(querys['search'])
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1, 'alt': 1})
     if 'sort' in querys:
         movies.sort(querys['sort'], querys['order'])
+    movies.limit(20);
     data = list()
     for movie in movies:
         movie['douban_id'] = movie['id']

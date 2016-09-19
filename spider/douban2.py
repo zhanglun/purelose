@@ -41,13 +41,18 @@ subject_prefix = 'https://movie.douban.com/subject/'
 
 
 class Handler(BaseHandler):
+    retry_delay = {
+        0: 12 * 60 * 60,
+        '': 24 * 60 * 60
+    }
     crawl_config = {
-        'headers': headers
+        'headers': headers,
+        'auto_crawl': True
     }
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl('https://movie.douban.com/subject/1301680/?from=subject-page', callback=self.index_page)
+        self.crawl('https://movie.douban.com/subject/25977027/?from=subject-page', callback=self.index_page)
 
     @config(age=10 * 24 * 60 * 60)
     def index_page(self, response):
@@ -91,3 +96,8 @@ class Handler(BaseHandler):
             result = False
 
         return result
+
+    @catch_status_code_error
+    def callback(self, response):
+        # if response
+        pass

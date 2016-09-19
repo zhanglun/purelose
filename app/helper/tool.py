@@ -26,6 +26,4 @@ def format_query_args(args):
     else:
         query['order'] = 1
 
-    print(query)
-
     return query
