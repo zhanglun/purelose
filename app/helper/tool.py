@@ -21,6 +21,11 @@ def format_query_args(args):
     if 'sort' in args.keys():
         query['sort'] = args['sort'][0]
 
+    if 'limit' in args.keys():
+        query['limit'] = int(args['limit'][0]) > 20 and 20 or int(args['limit'][0])
+    else:
+        query['limit'] = 20
+
     if 'order' in args.keys():
         query['order'] = args['order'][0] == 'asc' and 1 or -1
     else:

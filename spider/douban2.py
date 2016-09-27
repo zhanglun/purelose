@@ -52,7 +52,7 @@ class Handler(BaseHandler):
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl('https://movie.douban.com/subject/25977027/?from=subject-page', callback=self.index_page)
+        self.crawl('https://movie.douban.com/subject/6390823/?from=subject-page', callback=self.index_page)
 
     @config(age=10 * 24 * 60 * 60)
     def index_page(self, response):
@@ -91,7 +91,7 @@ class Handler(BaseHandler):
 
         result = json.loads(txt)
         if 'rating' in result and 'average' in result['rating'] and result['rating']['average'] > 5.0:
-            movie_collection.update_one({'title': result['title']}, {'$set': result}, True)
+            movie_collection.update_one({'douban_id': douban_id}, {'$set': result}, True)
         else:
             result = False
 
