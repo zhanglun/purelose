@@ -52,7 +52,7 @@ class Handler(BaseHandler):
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl('https://movie.douban.com/subject/6390823/?from=subject-page', callback=self.index_page)
+        self.crawl('https://movie.douban.com/subject/6390823/?from=subject-page', callback=self.index_page, validate_cert=False)
 
     @config(age=10 * 24 * 60 * 60)
     def index_page(self, response):
@@ -63,7 +63,7 @@ class Handler(BaseHandler):
             href = each.attr.href
             douban_id = reg.search(href).group()
             href = api_prefix + douban_id
-            self.crawl(href, callback=self.api_page)
+            self.crawl(href, callback=self.api_page, validate_cert=False)
 
     @config(priority=2)
     def detail_page(self, response):
@@ -84,7 +84,7 @@ class Handler(BaseHandler):
         douban_id = reg.search(response.url).group()
         print(reg.search(response.url))
         subject_url = subject_prefix + douban_id
-        self.crawl(subject_url, callback=self.detail_page)
+        self.crawl(subject_url, callback=self.detail_page, validate_cert=False)
 
         # 保存信息
         txt = response.doc('p').text()
