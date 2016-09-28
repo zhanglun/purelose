@@ -19,11 +19,11 @@ class Encoder(json.JSONEncoder):
 def index():
     query_args = request.args.to_dict(False)
     querys = tool.format_query_args(query_args)
-    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1, 'alt': 1})
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'original_title': 1, 'images': 1, 'id': 1, 'alt': 1})
     if 'sort' in querys:
         movies.sort(querys['sort'], querys['order'])
     if 'limit' in querys:
-        movies.limit(querys['limit']);
+        movies.limit(querys['limit'])
     data = list()
     for movie in movies:
         movie['douban_id'] = movie['id']
@@ -47,7 +47,11 @@ def search():
                                         }
                                     ]}, cls=Encoder), mimetype='application/json')
     querys = tool.format_query_args(query_args)
-    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'images': 1, 'id': 1})
+    movies = mongo.db.movies.find(querys['search'], {'title': 1, 'original_title': 1, 'images': 1, 'id': 1})
+    if 'sort' in querys:
+        movies.sort(querys['sort'], querys['order'])
+    if 'limit' in querys:
+        movies.limit(querys['limit'])
     data = list()
     for movie in movies:
         movie['douban_id'] = movie['id']

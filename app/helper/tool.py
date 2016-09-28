@@ -13,7 +13,10 @@ def format_query_args(args):
         # title 模糊搜索
         if 'title' in dict_q:
             reg_title = re.compile(dict_q['title'])
-            dict_q['title'] = {'$regex': reg_title}
+            dict_q =  {'$or': [
+                {'title': {'$regex': reg_title}},
+                {'original_title': {'$regex': reg_title}},
+            ]}
         query['search'] = dict_q
     else:
         query['search'] = {}
@@ -31,4 +34,5 @@ def format_query_args(args):
     else:
         query['order'] = 1
 
+    print(query)
     return query
