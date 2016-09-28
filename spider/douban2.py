@@ -47,7 +47,8 @@ class Handler(BaseHandler):
     }
     crawl_config = {
         'headers': headers,
-        'auto_crawl': True
+        'auto_crawl': True,
+        'itag': 'v0.1.0'
     }
 
     @every(minutes=24 * 60)
