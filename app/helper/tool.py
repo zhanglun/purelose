@@ -4,7 +4,7 @@ import re
 def format_query_args(args):
     query = {}
     if 'q' in args.keys():
-        list_q = args['q'][0].split(' ')
+        list_q = args['q'][0].split(';')
         dict_q = {}
         for l in list_q:
             item = l.split(':')
@@ -12,8 +12,9 @@ def format_query_args(args):
 
         # title 模糊搜索
         if 'title' in dict_q:
-            reg_title = re.compile(dict_q['title'])
-            dict_q =  {'$or': [
+            print(type(dict_q['title']))
+            reg_title = re.compile('|'.join(dict_q['title'].split(' ')))
+            dict_q = {'$or': [
                 {'title': {'$regex': reg_title}},
                 {'original_title': {'$regex': reg_title}},
             ]}

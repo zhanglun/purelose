@@ -17,7 +17,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     HOST = 'localhost'
-    PORT = 8888
+    PORT = 4444
     DEBUG = True
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
