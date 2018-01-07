@@ -5,6 +5,7 @@ from config import config
 
 from app.views.home import home as home_blueprint
 from app.views.api import api as api_blueprint
+from app.views.luoo import music as luoo_blueprint
 
 
 def create_app(config_name):
@@ -19,10 +20,11 @@ def create_app(config_name):
 
     app.register_blueprint(home_blueprint)
     app.register_blueprint(api_blueprint)
+    app.register_blueprint(luoo_blueprint)
 
     @app.errorhandler(404)
     def http_error_handler(error):
-        return make_response(jsonify({'error': 'Not found arer'}), 404)
+        return make_response(jsonify({'error': 'Not found'}), 404)
 
     @app.errorhandler(500)
     def http_error_handler(error):

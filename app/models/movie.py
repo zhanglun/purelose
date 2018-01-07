@@ -1,6 +1,7 @@
 from app.models import mongo
 
-class MovieModel:
+
+class Model:
     def __init__(self):
         pass
 
