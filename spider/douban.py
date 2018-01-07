@@ -9,9 +9,10 @@ import json
 from pymongo import MongoClient
 
 
-class DBUtil():
+class DBUtil:
     def __init__(self, object):
         uri = 'mongodb://localhost:27017'
+
         # 数据库客户端
         self.client = MongoClient(uri)
 
@@ -101,4 +102,5 @@ class Handler(BaseHandler):
     @catch_status_code_error
     def callback(self, response):
         # if response
+        print(response)
         pass
