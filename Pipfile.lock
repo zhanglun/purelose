@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "791c3552a17598e27b832622414a013731ecaeec3dacc51ab29ba5864dbadd90"
+            "sha256": "93570e64f13788194da897d2c8033afa8d33b4c84ea2fa87fe531745a5af41fb"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -123,6 +123,13 @@
                 "sha256:3d45302fc2622fabf34356ba274c69df41285bac71bbd229f1587283b851b91e"
             ],
             "version": "==3.3.0"
+        },
+        "pymysql": {
+            "hashes": [
+                "sha256:04fa19fad017fdb21394fad2878c1d6bd346959d4fbfd1b66050a09fc636a321",
+                "sha256:32da4a66397077d42908e449688f2ec71c2b18892a6cd04f03ab2aa828a70f40"
+            ],
+            "version": "==0.8.0"
         },
         "qiniu": {
             "hashes": [
