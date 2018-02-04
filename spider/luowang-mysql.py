@@ -182,7 +182,7 @@ class Handler(BaseHandler):
             'User-Agent': USER_AGENT,
         },
         'auto_crawl': True,
-        'itag': 'v0.1.0',
+        'itag': 'v0.1.1',
     }
 
     @every(minutes=24 * 60)
@@ -245,6 +245,7 @@ class Handler(BaseHandler):
             'cover': response.doc('.vol-cover').attr.src,
             'vol_prev': response.doc('.nav-prev').attr.href,
             'vol_next': response.doc('.nav-next').attr.href,
+            'created_at': response.doc('.vol-date').html().strip(),
             'track_list_id': track_list_id,
             'tags': re.escape(",".join(tags)),
         }
@@ -258,6 +259,7 @@ class Handler(BaseHandler):
         # if response
         print(response)
         pass
+
 
 
 
