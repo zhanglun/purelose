@@ -15,6 +15,8 @@ CREATE TABLE `lianjia_xiaoqu` (
   `origin_url` varchar(256) DEFAULT NULL,
   `input_at` timestamp NULL DEFAULT NULL,
   `rid` varchar(36) DEFAULT NULL,
+  `lng` varchar(256) DEFAULT NULL,
+  `lat` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rid` (`rid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

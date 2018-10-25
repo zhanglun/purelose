@@ -155,7 +155,7 @@ class Handler(BaseHandler):
             'User-Agent': USER_AGENT,
         },
         'auto_crawl': True,
-        'itag': 'v0.1.0',
+        'itag': 'v0.1.2',
     }
 
     @every(minutes=24 * 60)
@@ -175,10 +175,13 @@ class Handler(BaseHandler):
 
     @config(priority=2)
     def detail_page(self, response):
-        rid = re.search('xiaoqu/([0-9a-zA-Z]+)', response.url).group(1)
-        name = response.doc('html > body > * > div.xiaoquDetailHeaderContent > div.detailHeader.fl > .detailTitle').text()
-        address = response.doc('html > body > * > div.xiaoquDetailHeaderContent.clear > .detailHeader.fl > .detailDesc').text()
-        average_price = response.doc('html > body > .xiaoquOverview > .fr > .xiaoquPrice > div > .xiaoquUnitPrice').text()
+        rid = re.search('xiaoqu/([0-9a-zA-Z]+)+', response.url).group(1)
+        name = response.doc(
+            'html > body > * > div.xiaoquDetailHeaderContent > div.detailHeader.fl > .detailTitle').text()
+        address = response.doc(
+            'html > body > * > div.xiaoquDetailHeaderContent.clear > .detailHeader.fl > .detailDesc').text()
+        average_price = response.doc(
+            'html > body > .xiaoquOverview > .fr > .xiaoquPrice > div > .xiaoquUnitPrice').text()
 
         xiaoqu_info = response.doc('html > body > .xiaoquOverview > .fr > .xiaoquInfo > div > .xiaoquInfoContent')
 
@@ -191,6 +194,14 @@ class Handler(BaseHandler):
         developers = xiaoqu_info.eq(4).text()
         building_count = xiaoqu_info.eq(5).text()
         house_count = xiaoqu_info.eq(5).text()
+
+        location = response.doc(
+            'html > body > * > .xiaoquDescribe.fr > * > div.xiaoquInfoItem > .xiaoquInfoContent').find('span').attr(
+            'xiaoqu')
+        location = json.loads(location)
+
+        lng = '' + str(location[0])
+        lat = '' + str(location[1])
 
         result = {
             'rid': rid,
@@ -208,10 +219,10 @@ class Handler(BaseHandler):
             'house_count': house_count,
             'input_at': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
             'city': AREA,
+            'lng': lng,
+            'lat': lat,
         }
 
         db_helper.save_or_update(db_helper.table_lianjia_xiaoqu, result)
 
         return result
-
-
