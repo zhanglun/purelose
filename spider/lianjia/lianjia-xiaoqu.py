@@ -160,11 +160,25 @@ class Handler(BaseHandler):
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl('https://bj.lianjia.com/xiaoqu/?from=rec', callback=self.index_page)
+        self.crawl(START_PAGE, callback=self.area_page)
 
-        for each in range(150):
-            # if re.match('/ershoufang/pg\d+', each.attr.href, re.U):
-            self.crawl(START_PAGE + 'pg' + str(each), callback=self.index_page)
+    @config(age=10 * 24 * 60 * 60)
+    def area_page(self, response):
+        links = response.doc('a[href*="lianjia.com/xiaoqu/"]').items();
+        reg = re.compile('lianjia.com/xiaoqu/\d+/')
+
+        for link in links:
+
+            match = reg.findall(link.attr.href)
+
+            if match:
+                print(link.attr.href)
+                self.crawl(link.attr.href, callback=self.detail_page)
+            elif re.match(r'https://[a-z]+.lianjia.com/xiaoqu/', link.attr.href):
+
+                self.crawl(link.attr.href, callback=self.area_page)
+            else:
+                self.crawl(link.attr.href, callback=self.index_page)
 
     @config(age=10 * 24 * 60 * 60)
     def index_page(self, response):
@@ -175,13 +189,22 @@ class Handler(BaseHandler):
 
     @config(priority=2)
     def detail_page(self, response):
-        rid = re.search('xiaoqu/([0-9a-zA-Z]+)+', response.url).group(1)
+        # 页面跳转，资源不存在
+        if not re.search('/xiaoqu/([0-9a-zA-Z]+)+', response.url):
+            return
+
+        rid = re.search('/xiaoqu/([0-9a-zA-Z]+)+', response.url).group(1)
+        city = re.search('https://([a-z]+).', response.url).group(1)
         name = response.doc(
             'html > body > * > div.xiaoquDetailHeaderContent > div.detailHeader.fl > .detailTitle').text()
         address = response.doc(
             'html > body > * > div.xiaoquDetailHeaderContent.clear > .detailHeader.fl > .detailDesc').text()
+
         average_price = response.doc(
             'html > body > .xiaoquOverview > .fr > .xiaoquPrice > div > .xiaoquUnitPrice').text()
+
+        if not average_price:
+            average_price = '0'
 
         xiaoqu_info = response.doc('html > body > .xiaoquOverview > .fr > .xiaoquInfo > div > .xiaoquInfoContent')
 
@@ -198,10 +221,14 @@ class Handler(BaseHandler):
         location = response.doc(
             'html > body > * > .xiaoquDescribe.fr > * > div.xiaoquInfoItem > .xiaoquInfoContent').find('span').attr(
             'xiaoqu')
-        location = json.loads(location)
 
-        lng = '' + str(location[0])
-        lat = '' + str(location[1])
+        try:
+            location = json.loads(location)
+            lng = '' + str(location[0])
+            lat = '' + str(location[1])
+        except:
+            lng = ''
+            lat = ''
 
         result = {
             'rid': rid,
@@ -218,7 +245,7 @@ class Handler(BaseHandler):
             'developers': developers,
             'house_count': house_count,
             'input_at': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
-            'city': AREA,
+            'city': city,
             'lng': lng,
             'lat': lat,
         }
@@ -226,3 +253,9 @@ class Handler(BaseHandler):
         db_helper.save_or_update(db_helper.table_lianjia_xiaoqu, result)
 
         return result
+
+
+
+
+
+

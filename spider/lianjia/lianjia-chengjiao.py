@@ -4,6 +4,8 @@
 # Project: lianjia_chengjiao_bj
 
 import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 from pyspider.libs.base_handler import *
 import pymysql.cursors
@@ -163,10 +165,24 @@ class Handler(BaseHandler):
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl('https://bj.lianjia.com/chengjiao/?from=rec', callback=self.index_page)
+        self.crawl(START_PAGE, callback=self.area_page)
 
-        for each in range(150):
-            self.crawl(START_PAGE + 'pg' + str(each), callback=self.index_page)
+    @config(age=10 * 24 * 60 * 60)
+    def area_page(self, response):
+        links = response.doc('a[href*="/chengjiao/"]').items()
+        reg = re.compile('/chengjiao/\d+[.html]')
+
+        for link in links:
+
+            match = reg.findall(link.attr.href)
+
+            if match:
+                self.crawl(link.attr.href, callback=self.detail_page)
+            elif re.match(r'https://[a-z]+.lianjia.com/chengjiao/', link.attr.href):
+                print(link.attr.href)
+                self.crawl(link.attr.href, callback=self.area_page)
+            else:
+                self.crawl(link.attr.href, callback=self.index_page)
 
     @config(age=10 * 24 * 60 * 60)
     def index_page(self, response):
@@ -177,6 +193,7 @@ class Handler(BaseHandler):
 
     @config(priority=2)
     def detail_page(self, response):
+        city = re.search('https://([a-z]+).', response.url).group(1)
         house_title = response.doc('html > body > .house-title')
         hid = house_title.attr['data-lj_action_resblock_id']
         rid = house_title.attr['data-lj_action_housedel_id']
@@ -189,7 +206,6 @@ class Handler(BaseHandler):
             'html > body > .houseContentBox > .m-left > #introduction > .introContent > .base > .content > ul > li')
 
         building_structure = building_info.eq(0).contents()[1]
-        print(building_structure)
         building_floor = building_info.eq(1).contents()[1]
         building_size = building_info.eq(2).contents()[1]
         building_meta = building_info.eq(3).contents()[1]
@@ -198,7 +214,18 @@ class Handler(BaseHandler):
         building_year = building_info.eq(7).contents()[1]
 
         origin_title = response.doc('title').text()
-        area_name = origin_title.split()[0]
+        community_name = origin_title.split()[0]
+        areas = response.doc('* > * > * > * > div.agent-box > div.myAgent > .name a')
+
+        if areas.eq(0):
+            city_area = areas.eq(0).text()
+        else:
+            city_area = ''
+
+        if areas.eq(1):
+            area_name = areas.eq(1).text()
+        else:
+            area_name = ''
 
         result = {
             'hid': hid,
@@ -207,7 +234,9 @@ class Handler(BaseHandler):
             'sign_method': sign_method,
             'total_price': total_price,
             'unit_price': unit_price,
+            'city_area': city_area,
             'area_name': area_name,
+            'community_name': community_name,
             'origin_url': response.url,
             'origin_title': response.doc('title').text(),
             'building_structure': building_structure,
@@ -218,7 +247,7 @@ class Handler(BaseHandler):
             'building_towards': building_towards,
             'building_year': building_year,
             'input_at': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
-            'city': AREA,
+            'city': city,
         }
 
         print(result)
@@ -263,4 +292,6 @@ class Handler(BaseHandler):
         # if response
         print(response)
         pass
+
+
 
