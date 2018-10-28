@@ -23,6 +23,7 @@ pymysql = "*"
 
 [dev-packages]
 
+pylint = "*"
 
 
 [requires]

@@ -4,6 +4,7 @@
 # Project: lianjia_chengjiao_bj
 
 import sys
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -142,10 +143,6 @@ class DBHelper:
 
 db_helper = DBHelper()
 
-AREA = 'bj'
-START_PAGE = 'https://bj.lianjia.com/chengjiao/'
-API_PREFIX_CAST = 'https://bj.lianjia.com/ershoufang/housestat'
-BLOCK_URL = 'https://' + AREA + '.lianjia.com/chengjiao/resblock?'
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36'
 
@@ -163,33 +160,60 @@ class Handler(BaseHandler):
         'itag': 'v0.1.0',
     }
 
+    __city = 'bj'
+    __start_page = 'https://{city}.lianjia.com/chengjiao/'.format(city=__city)
+
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl(START_PAGE, callback=self.area_page)
+        self.crawl(self.__start_page, callback=self.get_areas)
 
     @config(age=10 * 24 * 60 * 60)
-    def area_page(self, response):
-        links = response.doc('a[href*="/chengjiao/"]').items()
-        reg = re.compile('/chengjiao/\d+[.html]')
+    def get_areas(self, response):
+        area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
+
+        for each in area:
+            self.crawl(each.attr.href, callback=self.get_index_list)
+
+        links = response.doc('a[href*="https://{city}.lianjia.com/chengjiao/"]'.format(city=self.__city)).items()
+        reg = re.compile('chengjiao/\d+.html$')
 
         for link in links:
+            print(link.attr.href)
+            match = reg.search(link.attr.href)
 
-            match = reg.findall(link.attr.href)
-
+            # 页面连接
             if match:
+                print('页面连接')
                 self.crawl(link.attr.href, callback=self.detail_page)
-            elif re.match(r'https://[a-z]+.lianjia.com/chengjiao/', link.attr.href):
-                print(link.attr.href)
-                self.crawl(link.attr.href, callback=self.area_page)
-            else:
-                self.crawl(link.attr.href, callback=self.index_page)
+            elif re.match(r'/chengjiao/([a-zA-z0-9]+/)+', link.attr.href):
+                print('正常的index 连接', link.attr.href)
+                self.crawl(link.attr.href, callback=self.get_index_list)
 
     @config(age=10 * 24 * 60 * 60)
-    def index_page(self, response):
+    def get_index_list(self, response):
+        area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
+
+        for each in area:
+            self.crawl(each.attr.href, callback=self.get_index_list)
 
         # 详情页面
         for each in response.doc('* > body > .content > .leftContent > .listContent > li > .info > .title > a').items():
             self.crawl(each.attr.href, callback=self.detail_page)
+
+        # 列表页检查分页信息
+        page_data = response.doc('.page-box.house-lst-page-box').attr('page-data')
+
+        print('page_data', page_data)
+
+        if page_data:
+            page_data = json.loads(page_data)
+            total = page_data['totalPage']
+            print(re.search('(/pg\d+/$)', response.url))
+
+            # 如果当前url已经是分页访问，不处理
+            if re.search('(/pg\d+/$)', response.url) is None:
+                for each in range(total):
+                    self.crawl(response.url + 'pg' + str(each + 1), callback=self.get_index_list)
 
     @config(priority=2)
     def detail_page(self, response):
@@ -254,11 +278,6 @@ class Handler(BaseHandler):
 
         db_helper.save_or_update(db_helper.table_lianjia_chengjiao, result)
 
-        # # 获取小区信息
-        # request_block_url = '{prefix}hid={hid}&rid={rid}'.format(prefix=BLOCK_URL, hid=hid, rid=rid)
-
-        # self.crawl(request_block_url, callback=self.get_block_detail)
-
         return result
 
     # @config(priority=2)
@@ -292,6 +311,3 @@ class Handler(BaseHandler):
         # if response
         print(response)
         pass
-
-
-

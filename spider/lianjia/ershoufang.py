@@ -138,12 +138,7 @@ class DBHelper:
 
 db_helper = DBHelper()
 
-AREA = 'bj'
-START_PAGE = 'https://bj.lianjia.com/ershoufang/'
-API_PREFIX_CAST = 'https://bj.lianjia.com/ershoufang/housestat'
-
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36'
-
 
 class Handler(BaseHandler):
     retry_delay = {
@@ -155,36 +150,67 @@ class Handler(BaseHandler):
             'User-Agent': USER_AGENT,
         },
         'auto_crawl': True,
-        'itag': 'v1.1.0',
+        'itag': 'v0.1.0',
     }
+
+    __city = 'bj'
+    __start_page = 'https://{city}.lianjia.com/ershoufang/'.format(city=__city)
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl(START_PAGE, callback=self.area_page)
+        self.crawl(self.__start_page, callback=self.get_areas)
 
     @config(age=10 * 24 * 60 * 60)
-    def area_page(self, response):
-        links = response.doc('a[href*="/ershoufang/"]').items()
-        reg = re.compile('/ershoufang/\d+/')
+    def get_areas(self, response):
+        # 获取筛选项的链接
+        area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
+
+        for each in area:
+            print('areas', each.text())
+            self.crawl(each.attr.href, callback=self.get_index_list)
+
+        links = response.doc('a[href*="ershoufang"]'.format(city=self.__city)).items()
+        reg = re.compile('/ershoufang/\d+.html')
 
         for link in links:
-
-            match = reg.findall(link.attr.href)
+            print(link.attr.href)
+            match = reg.search(link.attr.href)
 
             if match:
+                print('页面连接')
                 self.crawl(link.attr.href, callback=self.detail_page)
-            elif re.match(r'https://[a-z]+.lianjia.com/ershoufang/([a-zA-z0-0]/)?$', link.attr.href):
-                self.crawl(link.attr.href, callback=self.area_page)
-                self.crawl(link.attr.href, callback=self.index_page)
-            else:
-                self.crawl(link.attr.href, callback=self.index_page)
+            elif re.match(r'/ershoufang/([a-zA-z0-9]+/)+', link.attr.href):
+                print('正常的index 连接', link.attr.href)
+                self.crawl(link.attr.href, callback=self.get_index_list)
 
     @config(age=10 * 24 * 60 * 60)
-    def index_page(self, response):
+    def get_index_list(self, response):
+        area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
+
+        for each in area:
+            self.crawl(each.attr.href, callback=self.get_index_list)
 
         # 详情页面
-        for each in response.doc('.sellListContent > li.clear.LOGCLICKDATA > .info.clear > .title > a').items():
+        items = response.doc('.sellListContent > li.clear.LOGCLICKDATA > .info.clear > .title > a').items()
+
+        for each in items:
             self.crawl(each.attr.href, callback=self.detail_page)
+
+        # 列表页检查分页信息
+        page_data = response.doc('.page-box.house-lst-page-box').attr('page-data')
+
+        print('page_data', page_data)
+
+        if page_data:
+            page_data = json.loads(page_data)
+            total = page_data['totalPage']
+
+            print(re.search('(/pg\d+/$)', response.url))
+
+            # 如果当前url已经是分页访问，不处理
+            if re.search('(/pg\d+/$)', response.url) is None:
+                for each in range(total):
+                    self.crawl(response.url + 'pg' + str(each + 1), callback=self.get_index_list)
 
     @config(priority=2)
     def detail_page(self, response):
@@ -233,18 +259,19 @@ class Handler(BaseHandler):
         db_helper.save_or_update(db_helper.table_lianjia_ershoufang, result)
 
         # TODO: 针对城市差异化
-        if city is 'bj':
+        if city == 'bj':
 
             # 获取首付、月供等信息
-            cost_url = 'https://bj.lianjia.com/tools/calccost?house_code={hid}'.format(hid=hid)
+            cost_url = 'https://{city}.lianjia.com/tools/calccost?house_code={hid}'.format(city=self.__city, hid=hid)
 
-            self.crawl(cost_url, callback=self.get_cast_detail)
+            self.crawl(cost_url, callback=self.get_cast_detail, save={ 'hid': hid})
 
         return result
 
     @config(priority=2)
     def get_cast_detail(self, response):
-        hid = re.search('\?house_code=(.+)', response.url).group(1)
+        # hid = re.search('\?house_code=(.+)', response.url).group(1)
+        hid = response.save['hid']
         result = response.json
         payment = result['data']['payment']
         cost_payment = {
@@ -263,7 +290,6 @@ class Handler(BaseHandler):
 
         return {
             "url": response.url,
-            "title": response.doc('title').text(),
             "resource": resource,
         }
 
@@ -272,5 +298,7 @@ class Handler(BaseHandler):
         # if response
         print(response)
         pass
+
+
 
 
