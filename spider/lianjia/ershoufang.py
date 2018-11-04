@@ -16,19 +16,21 @@ class DBHelper:
             host='127.0.0.1',
             port=3306,
             user='root',
-            db='house',
+            db='lianjia',
             use_unicode=True,
             charset="utf8"
         )
-        self.table_lianjia_ershoufang = 'lianjia_ershoufang'
+        self.table_lianjia_ershoufang = 'ershoufang'
         self.cursor = self.connection.cursor()
 
     def execute_sql(self, sql):
+        cursor = self.connection.cursors()
+
         try:
-            self.cursor.execute(sql)
+            cursor.execute(sql)
             self.connection.commit()
         finally:
-            self.connection.close()
+            cursor.close()
 
     def insert(self, table, tdict):
         column = ''
@@ -80,6 +82,8 @@ class DBHelper:
         column = ''
         value = ''
         update = ''
+        cursor = self.connection.cursor()
+
         for key in tdict:
             if tdict[key] is not None:
                 column += ',' + key
@@ -94,17 +98,19 @@ class DBHelper:
 
         print(sql)
 
-        self.cursor.execute(sql)
+        cursor.execute(sql)
+
         self.connection.commit()
 
-        last_id = self.cursor.lastrowid
+        last_id = cursor.lastrowid
 
-        # self.cursor.close()
+        cursor.close()
 
     def batch_save_or_update(self, table, tlist):
         columns = []
         values = []
         updates = []
+        cursor = self.connection.cursor()
 
         for tdict in tlist:
             column = ''
@@ -128,13 +134,11 @@ class DBHelper:
 
         print(sql)
 
-        self.cursor.execute(sql)
+        cursor.execute(sql)
         self.connection.commit()
 
         last_id = self.cursor.lastrowid
-
-        # self.cursor.close()
-
+        cursor.close()
 
 db_helper = DBHelper()
 
@@ -155,6 +159,7 @@ class Handler(BaseHandler):
 
     __city = 'bj'
     __start_page = 'https://{city}.lianjia.com/ershoufang/'.format(city=__city)
+    __res_block_url = 'https://{city}.lianjia.com/chengjiao/resblock'.format(city=__city)
 
     @every(minutes=24 * 60)
     def on_start(self):
@@ -221,42 +226,62 @@ class Handler(BaseHandler):
         rid = info_block.attr['data-lj_action_housedel_id']
 
         transaction_info = response.doc('.transaction li').items()
-        transaction = []
+        base_info = response.doc('.transaction li').items()
+
+        base_attributes = []
+        transaction_attributes = []
+
+        for each in base_info:
+            label = each.find('.label').text()
+            text = each.text()
+            text = text.split(' ')
+            if text[1]:
+                value = text[1];
+            base_attributes.append(dict({
+                'label': label,
+                'value': value,
+            }))
+
+        print(base_attributes)
 
         for each in transaction_info:
             label = each.find('.label').text()
             value = each.find('span').eq(1).text()
-            transaction.append(dict({
+            transaction_attributes.append(dict({
                 'label': label,
                 'value': value,
             }))
 
         price = response.doc('.overview .content .price')
         price_total = price.find('.total').text()
-        price_total_unit = price.find('.unit').text()
         unit_price = price.find('.unitPriceValue').text()
-        community_name = response.doc('.overview > .content > .aroundInfo > .communityName > .info').text()
-        area_name = response.doc('.overview > .content > .aroundInfo > .areaName > .info').text()
+        city_area_list = response.doc('body > .overview > .content > .aroundInfo > .areaName > .info > a')
 
-        # 直接爬接口
-        # url = '{API_PREFIX}?hid={hid}&rid={rid}'.format(API_PREFIX=API_PREFIX, hid=hid, rid=rid)
-        # self.crawl(url, callback=self.detail_api)
+        if city_area_list.eq(0):
+            city_area = city_area_list.eq(0).text()
+        if city_area_list.eq(1):
+            area_name = city_area_list.eq(1).text()
+
+        community_name = response.doc('.overview > .content > .aroundInfo > .communityName > .info').text()
+
         result = {
             'origin_url': response.url,
-            'title': response.doc('title').text(),
+            'origin_title': response.doc('title').text(),
             'hid': hid,
             'rid': rid,
             'price_total': price_total,
-            'price_total_unit': price_total_unit,
             'unit_price': re.search('(\d*)', unit_price).group(1),
-            'community_name': community_name,
-            'area_name': area_name,
             'city': city,
-            'transaction': json.dumps(transaction, ensure_ascii=False),
-            'input_time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
+            'city_area': city_area,
+            'area_name': area_name,
+            'community_name': community_name,
+            'base_attributes': json.dumps(base_attributes, ensure_ascii=False),
+            'transaction_attributes': json.dumps(transaction_attributes, ensure_ascii=False),
+            'input_at': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
         }
 
-        db_helper.save_or_update(db_helper.table_lianjia_ershoufang, result)
+        # db_helper.save_or_update(db_helper.table_lianjia_ershoufang, result)
+        self.crawl(self.__res_block_url, params={ 'hid': hid, 'rid': rid }, save=result, callback=self.get_res_block_detail)
 
         # TODO: 针对城市差异化
         if city == 'bj':
@@ -270,7 +295,6 @@ class Handler(BaseHandler):
 
     @config(priority=2)
     def get_cast_detail(self, response):
-        # hid = re.search('\?house_code=(.+)', response.url).group(1)
         hid = response.save['hid']
         result = response.json
         payment = result['data']['payment']
@@ -293,11 +317,30 @@ class Handler(BaseHandler):
             "resource": resource,
         }
 
+    @config(priority=2)
+    def get_res_block_detail(self, response):
+        resource = response.save
+        data = response.json
+        res_block = data['data']
+
+        print(res_block)
+
+        try:
+            resource['community_meta'] = json.dumps(res_block)
+        except:
+            resource['community_meta'] = '';
+
+        print(resource)
+
+        db_helper.save_or_update(db_helper.table_lianjia_ershoufang, resource)
+
     @catch_status_code_error
     def callback(self, response):
         # if response
         print(response)
         pass
+
+
 
 
 

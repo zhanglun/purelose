@@ -24,11 +24,13 @@ class DBHelper:
         self.cursor = self.connection.cursor()
 
     def execute_sql(self, sql):
+        cursor = self.connection.cursors()
+
         try:
-            self.cursor.execute(sql)
+            cursor.execute(sql)
             self.connection.commit()
         finally:
-            self.connection.close()
+            cursor.close()
 
     def insert(self, table, tdict):
         column = ''
@@ -108,6 +110,7 @@ class DBHelper:
         columns = []
         values = []
         updates = []
+        cursor = self.connection.cursor()
 
         for tdict in tlist:
             column = ''
@@ -153,6 +156,8 @@ class Handler(BaseHandler):
         'headers': {
             'User-Agent': USER_AGENT,
         },
+        'connect_timeout': 50,
+        'timeout': 200,
         'auto_crawl': True,
         'itag': 'v0.1.1',
     }
