@@ -80,6 +80,8 @@ class DBHelper:
         column = ''
         value = ''
         update = ''
+        cursor = self.connection.cursor()
+
         for key in tdict:
             if tdict[key] is not None:
                 column += ',' + key
@@ -94,12 +96,13 @@ class DBHelper:
 
         print(sql)
 
-        self.cursor.execute(sql)
+        cursor.execute(sql)
+
         self.connection.commit()
 
-        last_id = self.cursor.lastrowid
+        last_id = cursor.lastrowid
 
-        # self.cursor.close()
+        cursor.close()
 
     def batch_save_or_update(self, table, tlist):
         columns = []
@@ -128,7 +131,7 @@ class DBHelper:
 
         print(sql)
 
-        self.cursor.execute(sql)
+        cursor.execute(sql)
         self.connection.commit()
 
         last_id = self.cursor.lastrowid
@@ -151,7 +154,7 @@ class Handler(BaseHandler):
             'User-Agent': USER_AGENT,
         },
         'auto_crawl': True,
-        'itag': 'v0.1.0',
+        'itag': 'v0.1.1',
     }
 
     __city = 'bj'
@@ -160,14 +163,14 @@ class Handler(BaseHandler):
 
     @every(minutes=24 * 60)
     def on_start(self):
-        self.crawl(self.__start_page, callback=self.get_areas)
+        self.crawl(self.__start_page, callback=self.get_areas, connect_timeout = 50, timeout = 200)
 
     @config(age=10 * 24 * 60 * 60)
     def get_areas(self, response):
         area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
 
         for each in area:
-            self.crawl(each.attr.href, callback=self.get_index_list)
+            self.crawl(each.attr.href, callback=self.get_index_list, connect_timeout = 50, timeout = 200)
 
         links = response.doc('a[href*="https://{city}.lianjia.com/chengjiao/"]'.format(city=self.__city)).items()
         reg = re.compile('chengjiao/\d+.html$')
@@ -177,20 +180,20 @@ class Handler(BaseHandler):
 
             # 页面连接
             if match:
-                self.crawl(link.attr.href, callback=self.detail_page)
+                self.crawl(link.attr.href, callback=self.detail_page, connect_timeout = 50, timeout = 200)
             elif re.match(r'/chengjiao/([a-zA-z0-9]+/)+', link.attr.href):
-                self.crawl(link.attr.href, callback=self.get_index_list)
+                self.crawl(link.attr.href, callback=self.get_index_list, connect_timeout = 50, timeout = 200)
 
     @config(age=10 * 24 * 60 * 60)
     def get_index_list(self, response):
         area = response.doc('* > * > .m-filter > .position > * > dd > * > div > a').items()
 
         for each in area:
-            self.crawl(each.attr.href, callback=self.get_index_list)
+            self.crawl(each.attr.href, callback=self.get_index_list, connect_timeout = 50, timeout = 200)
 
         # 详情页面
         for each in response.doc('* > body > .content > .leftContent > .listContent > li > .info > .title > a').items():
-            self.crawl(each.attr.href, callback=self.detail_page)
+            self.crawl(each.attr.href, callback=self.detail_page, connect_timeout = 50, timeout = 200)
 
         # 列表页检查分页信息
         page_data = response.doc('.page-box.house-lst-page-box').attr('page-data')
@@ -204,7 +207,7 @@ class Handler(BaseHandler):
             # 如果当前url已经是分页访问，不处理
             if re.search('(/pg\d+/$)', response.url) is None:
                 for each in range(total):
-                    self.crawl(response.url + 'pg' + str(each + 1), callback=self.get_index_list)
+                    self.crawl(response.url + 'pg' + str(each + 1), callback=self.get_index_list, connect_timeout = 50, timeout = 200)
 
     @config(priority=2)
     def detail_page(self, response):
@@ -214,10 +217,13 @@ class Handler(BaseHandler):
         rid = house_title.attr['data-lj_action_housedel_id']
 
         sign_at = response.doc('html > body > .LOGVIEW > div.wrapper > span').text()
-        sign_at_time = re.search('(\d+\.\d+\.\d+)', sign_at);
+        sign_at_time = re.search('(\d+(\.\d+)?(\.\d+)?)', sign_at);
 
         if sign_at_time and sign_at_time.group(1):
-            sign_at =  time.strftime('%Y-%m-%d', time.strptime(sign_at_time.group(1), '%Y.%m.%d'))
+            value = sign_at_time.group(1) + '.01.01'
+            value = '.'.join(value.split('.')[:3])
+            print(value)
+            sign_at =  time.strftime('%Y-%m-%d', time.strptime(value, '%Y.%m.%d'))
 
         sign_method = '链家'
         total_price = response.doc('html > body > .wrapper > .overview > .info.fr > * > .dealTotalPrice > i').text()
@@ -270,7 +276,7 @@ class Handler(BaseHandler):
             'city': city,
         }
 
-        self.crawl(self.__res_block_url, params={ 'hid': hid, 'rid': rid }, save=result, callback=self.get_res_block_detail)
+        self.crawl(self.__res_block_url, params={ 'hid': hid, 'rid': rid }, save=result, callback=self.get_res_block_detail, connect_timeout = 50, timeout = 200)
 
     @config(priority=2)
     def get_res_block_detail(self, response):
@@ -294,5 +300,6 @@ class Handler(BaseHandler):
         # if response
         print(response)
         pass
+
 
 
