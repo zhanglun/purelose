@@ -75,3 +75,36 @@ create table if not exists `xiaoqu` (
   UNIQUE KEY `rid` (`rid`),
   KEY `city` (`city`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `zufang` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `hid` varchar(36) DEFAULT NULL,
+  `city` varchar(12) DEFAULT NULL,
+  `city_area` varchar(12) DEFAULT NULL,
+  `area_name` varchar(12) DEFAULT NULL,
+  `community_name` varchar(30) DEFAULT NULL,
+  `community_meta` text COMMENT '小区其他信息',
+  `monthly_rent` bigint(30) DEFAULT NULL COMMENT '租金',
+  `monthly_rent_unit` varchar(6) DEFAULT NULL,
+  `decoration_type` varchar(10) DEFAULT NULL COMMENT '装修类型',
+  `floor_area` varchar(30) DEFAULT NULL COMMENT '面积',
+  `floor_inside_area` varchar(30) DEFAULT NULL COMMENT '套内面积',
+  `building_structure` varchar(16) DEFAULT NULL COMMENT '结构',
+  `building_floor` varchar(10) DEFAULT NULL COMMENT '楼层',
+  `building_towards` varchar(16) DEFAULT NULL COMMENT '朝向',
+  `subway_info` varchar(80) DEFAULT NULL COMMENT '地铁信息',
+  `publish_at` timestamp NULL DEFAULT NULL COMMENT '发布时间',
+  `lease_way` varchar(10) DEFAULT NULL COMMENT '租赁方式',
+  `pay_way` varchar(10) DEFAULT NULL COMMENT '支付方式',
+  `status` varchar(10) DEFAULT NULL COMMENT '状态',
+  `heating_way` varchar(10) DEFAULT NULL COMMENT '供热方式',
+  `origin_title` varchar(80) DEFAULT NULL COMMENT '',
+  `origin_url` varchar(80) DEFAULT NULL COMMENT '',
+  `input_at` timestamp NULL DEFAULT NULL COMMENT '录入时间',
+  `lng` varchar(36) DEFAULT NULL,
+  `lat` varchar(36) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hid` (`hid`),
+  KEY `city` (`city`),
+  KEY `city_area` (`city_area`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
